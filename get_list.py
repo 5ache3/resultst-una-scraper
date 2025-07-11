@@ -18,9 +18,9 @@ def get_list(fil):
         lis.append(item[0])
     return lis
 
-def get_unregistred_list(fil):
+def get_unregistred_list(fil,sem):
     lis=[]
-    pool.execute(f"""SELECT matricule from etudiants where fil='{fil}' AND matricule not in (select matricule from semestres) """)
+    pool.execute(f"""SELECT matricule from etudiants where fil='{fil}' AND matricule not in (select matricule from semestres WHERE semestre = '{sem}') """)
     # pool.execute('select distinct fil from etudiants')
 
     for item in pool:

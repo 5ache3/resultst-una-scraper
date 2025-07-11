@@ -113,18 +113,20 @@ def getSemDetails(soup):
     decision=sub_tables[2].find_all('span')[1].text
     return {"moyenne":moyenne,"decision":decision}
 
-def getMatiere(table,i):
+def getMatiere(table,i,t_id,t_col_id):
     matieres=[]
+    'ecriture:j_id207:0:j_id234:0:j_id235'
+    m_ind=235
     for j in range(len(table)):
-        # ecriture:j_id182:0:j_id209:0:j_id210
-        matiere_name=table.find('td',id=f'ecriture:j_id182:{i}:j_id209:{j}:j_id210').find('span').text
-        credit=table.find('td',id=f'ecriture:j_id182:{i}:j_id209:{j}:j_id212').find('span').text.replace(',','.')
-        Note_tp=table.find('td',id=f'ecriture:j_id182:{i}:j_id209:{j}:j_id214').find('span').text.replace(',','.')
-        Note_dev=table.find('td',id=f'ecriture:j_id182:{i}:j_id209:{j}:j_id216').find('span').text.replace(',','.')
-        Note_exam=table.find('td',id=f'ecriture:j_id182:{i}:j_id209:{j}:j_id218').find('span').text.replace(',','.')
-        Note_rat=table.find('td',id=f'ecriture:j_id182:{i}:j_id209:{j}:j_id220').find('span').text.replace(',','.')
-        Note_final=table.find('td',id=f'ecriture:j_id182:{i}:j_id209:{j}:j_id222').find('span').text.replace(',','.')
-        decision=table.find('td',id=f'ecriture:j_id182:{i}:j_id209:{j}:j_id224').find('span').text.replace(',','.')
+
+        matiere_name=table.find('td',id=f'{t_id}:{i}:{t_col_id}:{j}:j_id{m_ind+2*0}').find('span').text
+        credit      =table.find('td',id=f'{t_id}:{i}:{t_col_id}:{j}:j_id{m_ind+2*1}').find('span').text.replace(',','.')
+        Note_tp     =table.find('td',id=f'{t_id}:{i}:{t_col_id}:{j}:j_id{m_ind+2*2}').find('span').text.replace(',','.')
+        Note_dev    =table.find('td',id=f'{t_id}:{i}:{t_col_id}:{j}:j_id{m_ind+2*3}').find('span').text.replace(',','.')
+        Note_exam   =table.find('td',id=f'{t_id}:{i}:{t_col_id}:{j}:j_id{m_ind+2*4}').find('span').text.replace(',','.')
+        Note_rat    =table.find('td',id=f'{t_id}:{i}:{t_col_id}:{j}:j_id{m_ind+2*5}').find('span').text.replace(',','.')
+        Note_final  =table.find('td',id=f'{t_id}:{i}:{t_col_id}:{j}:j_id{m_ind+2*6}').find('span').text.replace(',','.')
+        decision    =table.find('td',id=f'{t_id}:{i}:{t_col_id}:{j}:j_id{m_ind+2*7}').find('span').text.replace(',','.')
         matiere_file={
             "name":matiere_name,
             "credit":int(float(credit.strip())),
@@ -140,19 +142,22 @@ def getMatiere(table,i):
     return matieres
 
 def getModules(soup):
-    table=soup.find('tbody',id="ecriture:j_id182:tb")
+    t_id='ecriture:j_id207'
+    t_col_id='j_id234'
+    t_ind=252
+    table=soup.find('tbody',id=f"{t_id}:tb")
     modules=[]
     for i in range(len(table)):
-        module_name=soup.find('td',id=f'ecriture:j_id182:{i}:j_id209:j_id227').find_all('span')[1].text
-        moyenne_module=soup.find('td',id=f'ecriture:j_id182:{i}:j_id209:j_id240').find('span').text
-        decision_module=soup.find('td',id=f'ecriture:j_id182:{i}:j_id209:j_id243').find('span').text
+        module_name    =soup.find('td',id=f'{t_id}:{i}:{t_col_id}:j_id{t_ind+13*0}').find_all('span')[1].text
+        moyenne_module =soup.find('td',id=f'{t_id}:{i}:{t_col_id}:j_id{t_ind+13*1}').find('span').text
+        decision_module=soup.find('td',id=f'{t_id}:{i}:{t_col_id}:j_id{t_ind+13*2-10}').find('span').text
         module_file={
             "name":f"{module_name}",
             "moyenne": float(moyenne_module.replace(',','.')),
             "decision": decision_module,
             "matiers":[]
             }
-        module_file['matiers']=getMatiere(soup.find('tbody',id=f'ecriture:j_id182:{i}:j_id209:tb'),i)
+        module_file['matiers']=getMatiere(soup.find('tbody',id=f'{t_id}:{i}:{t_col_id}:tb'),i,t_id=t_id,t_col_id=t_col_id)
         modules.append(module_file)
     return modules
 
@@ -176,16 +181,7 @@ def getPerson(matricule,semestre):
                     f.write(f'{matricule}\n')
                 return
             
-            amphi1=soup.find('td',id='ecriture:j_id309:0:j_id312').text.replace('Amphi :','')
-            amphi2=soup.find('td',id='ecriture:j_id309:1:j_id312').text.replace('Amphi :','')
-            # amphi2=soup.find('td',id='ecriture:j_id298:1:j_id301').text.replace('Amphi :','')
-            # groupe1=soup.find('td',id='ecriture:j_id298:0:j_id303').text.replace('Groupe :','')
-            # groupe2=soup.find('td',id='ecriture:j_id298:1:j_id303').text.replace('Groupe :','')
-            print(f'{matricule} {amphi1} {amphi2}')
-            if amphi1==amphi2:
-                amphi=amphi1
-            else:
-                amphi=[amphi1,amphi2]
+            
             
             infos=getInfos(soup)
             dropdown = page.wait_for_selector('select.rsinputTetx')
@@ -200,14 +196,14 @@ def getPerson(matricule,semestre):
             sub_filiere=infos['sub_fil']
             if infos['sub_fil']=='' : sub_filiere=infos['sub_class']
 
-            footer_table=soup.find('td',id='ecriture:j_id182:j_id246')
+            footer_table=soup.find('td',id='ecriture:j_id207:j_id271')
             res=getSemDetails(footer_table)
             moyenne=float(res['moyenne'].replace(',','.'))
             decision=res['decision']
-
-            file={"matricule":matricule,"nom":nom,"filiere":filiere,"sub_filiere":amphi,"semestre":semestre,"moyenne":moyenne,"decision":decision}
+            file={"matricule":matricule,"nom":nom,"filiere":filiere,"semestre":semestre,"moyenne":moyenne,"decision":decision}
 
             modules=getModules(soup)
+            
             file['modules']=modules
 
             return file
@@ -239,19 +235,22 @@ def save_to_File(file,path):
         json.dump(file,f,indent=2)
 
 filliere=get_registred_fils()
-filliere=[]
+filliere=['L2-DAII']
 
 for fil in filliere:
     try:
-        lis=get_list(fil)
-        i=0
-        l=len(lis)
         if 'L1' in fil:
             sem='S2'
         elif 'L2' in fil:
             sem='S4'
         else:
-            sem='S4'
+            sem='S6'
+
+        lis=get_list(fil)
+        lis=get_unregistred_list(fil,sem)
+        lis.reverse()
+        i=0
+        l=len(lis)
         for mat in lis:
             i+=1
             print(f'{fil} {mat} {i}/{l}')
@@ -262,7 +261,3 @@ for fil in filliere:
     except Exception as e:
         print(fil,e)
         
-
-file=getPerson("C22580",'S4')
-if file :
-    save_to_File(file,f'new/{mat}')
